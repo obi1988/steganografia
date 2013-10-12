@@ -103,7 +103,7 @@ public class Controller implements SliderActionListener{
 			Dialog.showWarning("Ostrzeżenie", "Plik z tekstem nie został jeszcze wczytany.");
 			return;
 		}
-		InputStream b = action.start(progBar, progIndi);
+		InputStream b = action.start();
 		imgView.setImage(new Image(b));
 		this.input = b; 
 

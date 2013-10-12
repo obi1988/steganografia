@@ -74,20 +74,27 @@ public class PictureAction {
 		*/
 	}
 	
-	public InputStream start(ProgressBar progBar, ProgressIndicator progIndi){
+	public InputStream start(){
 		byte[] dataBIT = null;
+		byte[] b = null;
 		try {
 			sliderAction.setSliders(1);
 //			byte[] b = data.extractBytesImage(this.file);
 //			byte[] b = data.extractBytesImage2(this.file);
 			
-			byte []b = Files.readAllBytes(Paths.get(this.file.getAbsolutePath()));
-			byte []c = data.textToBinary(b);
+			b = Files.readAllBytes(Paths.get(this.file.getAbsolutePath()));
+//			byte []c = data.textToBinary(b);  //bajt - bit
+			byte [] c = {0,0,0,1,0,0,1};
 			
-			dataBIT = data.saveText(c, new byte[] {0,0,0,1,0,0,1});
+			byte len[] = data.bit_conversion(c.length);
+			data.encode_text(b, len,  0); //0 first positiong
+			dataBIT = data.encode_text(b, c, 32); //4 bytes of space for length: 4bytes*8bit = 32 bits
+		
+			
+//			dataBIT = data.saveText(c, new byte[] {0,0,0,1,0,0,1});
 			sliderAction.setSliders(2);
-			
-			data.setBitmap(bmp, dataBIT);
+		
+			data.setBitmap(bmp, b);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -107,7 +114,7 @@ public class PictureAction {
 		try {
 			byte[] b = data.extractBytesImage(this.file);
 			byte[] z  = data.textToBinary2(b); ///tablica z bitami obrazka + txt
-			String wynik  = data.getText(z);
+			byte [] wynik  = data.decode_text(b);
 			
 			System.out.println(wynik + " aaaaaaaaaaaaaaa");
 //			im = data.toImage(b,byteText);
@@ -125,48 +132,39 @@ public class PictureAction {
 		
 	}
 	
-	public void saveFile(InputStream inputStream){
-		
-		FileOutputStream outputStream = null;
-		
-	        try {
-	        	inputStream.reset();    	
-	        	String path = getFile(false,false);
-	        	
-	        	if(!path.equals(""))
-	        	{
-	        		outputStream = new FileOutputStream(new File(path));
-	        	}
-	 
-	        	OutputStream out= outputStream;
-	        	
-	        	int read = 0;
-	    		byte[] bytes = new byte[1024];
-	    		
-	    		while ((read = inputStream.read(bytes,0,1024)) != -1) {
-	    			out.write(bytes, 0, read);
-	    		}
-	        	
-	        	/*
-	            FileWriter fileWriter = null;
-	             
-	            fileWriter = new FileWriter(file);
-	            fileWriter.write(content);
-	            fileWriter.close();*/
-	        } catch (IOException ex) {
-	            ex.printStackTrace();
-	        }finally{
-	        	if(outputStream != null){
-	        		try{
-	        			outputStream.close();
-	        		}catch(IOException e){
-	        			e.printStackTrace();
-	        		}
-	        	}
-	        }
-	         
-	    }
-	
+	public void saveFile(InputStream inputStream) {
+
+		OutputStream outputStream = null;
+
+		try {
+			inputStream.reset();
+			String path = getFile(false, false);
+
+			if (!path.equals("")) {
+				outputStream = (OutputStream) new FileOutputStream(new File(path));
+			}
+
+			int read = 0;
+			byte[] bytes = new byte[1024];
+
+			while ((read = inputStream.read(bytes, 0, 1024)) != -1) {
+				outputStream.write(bytes, 0, read);
+			}
+
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+
 	public void setSliderListener(SliderActionListener listener){
 		this.sliderAction = listener; 
 	}
